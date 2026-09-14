@@ -5,6 +5,7 @@ import com.fitness.userService.dto.UserResponse;
 import com.fitness.userService.models.User;
 import com.fitness.userService.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,6 +35,20 @@ public class UserService {
         response.setPassword(saveUser.getPassword());
         response.setFirstName(saveUser.getFirstName());
         response.setLastName(saveUser.getLastName());
+
+        return response;
+    }
+
+    public UserResponse getProfile(String userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserResponse response = new UserResponse();
+
+        response.setId(user.getId());
+        response.setEmail(user.getEmail());
+        response.setPassword(user.getPassword());
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
 
         return response;
     }
