@@ -9,7 +9,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
+
 public class UserService {
 
     private final UserRepository userRepository;
@@ -49,6 +49,8 @@ public class UserService {
         response.setPassword(user.getPassword());
         response.setFirstName(user.getFirstName());
         response.setLastName(user.getLastName());
+        response.setCreatedDate(user.getCreatedDate());
+        response.setUpdatedDate(user.getUpdatedDate());
 
         return response;
     }

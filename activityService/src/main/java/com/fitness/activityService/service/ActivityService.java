@@ -17,7 +17,6 @@ public class ActivityService {
 
     public @Nullable ActivityResponse trackActivity(ActivityRequest request) {
         Activity activity = Activity.builder()
-                .id(request.getUserId())
                 .userId(request.getUserId())
                 .type(request.getType())
                 .duration(request.getDuration())
@@ -37,6 +36,8 @@ public class ActivityService {
         response.setUserId(activity.getUserId());
         response.setType(activity.getType());
         response.setDuration(activity.getDuration());
+        response.setCreatedAt(activity.getCreatedAt());
+        response.setUpdatedAt(activity.getUpdatedAt());
         response.setCaloriesBurned(activity.getCaloriesBurned());
         response.setStartTime(activity.getStartTime());
         response.setAdditionalMetrics(activity.getAdditionalMetrics());
