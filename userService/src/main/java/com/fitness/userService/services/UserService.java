@@ -6,11 +6,13 @@ import com.fitness.userService.models.User;
 import com.fitness.userService.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -54,5 +56,10 @@ public class UserService {
         response.setUpdatedDate(user.getUpdatedDate());
 
         return response;
+    }
+
+    public Boolean existByUserId(String userId) {
+        log.info("Calling userService for {]" + userId);
+        return userRepository.existsById(userId);
     }
 }
