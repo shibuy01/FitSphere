@@ -5,11 +5,12 @@ import com.fitness.userService.dto.UserResponse;
 import com.fitness.userService.models.User;
 import com.fitness.userService.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 @Service
-
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
