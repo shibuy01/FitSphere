@@ -1,13 +1,18 @@
-package com.fitness.activityService.dto;
+package com.fitness.aiService.models;
 
-import com.fitness.activityService.models.ActivityId;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
 @Data
-public class ActivityResponse {
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Activity {
 
     private String id;
     private String userId;

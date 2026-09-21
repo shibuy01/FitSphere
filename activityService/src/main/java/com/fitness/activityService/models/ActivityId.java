@@ -1,6 +1,6 @@
 package com.fitness.activityService.models;
 
-public enum ActiviTyId {
+public enum ActivityId {
     RUNNING,
     WAITING,
     CYCLING,
