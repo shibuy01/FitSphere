@@ -18,7 +18,7 @@ public class GeminiService {
     @Value("${gemini.api.key}")
     private String geminiApiKey;
 
-    @Value("${gemini.model}")
+    @Value("${spring.ai.google.genai.chat.model}")
     private String geminiModel;
 
     public GeminiService(WebClient.Builder webClientBuilder) {

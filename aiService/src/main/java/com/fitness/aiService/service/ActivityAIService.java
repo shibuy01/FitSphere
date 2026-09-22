@@ -25,14 +25,34 @@ public class ActivityAIService {
     private Recommendation processAIResponse(Activity activity, String aiResponse) {
         try {
             ObjectMapper mapper = new ObjectMapper();
+
             JsonNode rootNode = mapper.readTree(aiResponse);
-            JsonNode textNode = rootNode.path("")
+
+            // Gemini response se text extract karo
+            String text = rootNode
+                    .path("candidates")
+                    .get(0)
+                    .path("content")
+                    .path("parts")
                     .get(0)
                     .path("text")
-                    .get()
+                    .asText();
 
-        } catch (Exception e){
+            System.out.println("AI Response: " + text);
 
+//            // Recommendation object create karo
+//            Recommendation recommendation = new Recommendation();
+//
+//            recommendation.setUserId(activity.getUserId());
+//            recommendation.setActivityId(activity.getId());
+//            recommendation.setRecommendation(text);
+//
+//            return recommendation;
+            return null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
