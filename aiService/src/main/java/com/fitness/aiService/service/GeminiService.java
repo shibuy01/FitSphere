@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -28,8 +29,16 @@ public class GeminiService {
     public String getRecommendation(String details) {
 
         Map<String, Object> requestBody = Map.of(
-                "model", geminiModel,
-                "input", details
+                "contents", List.of(
+                        Map.of(
+                                "parts", List.of(
+                                        Map.of("text", details)
+                                )
+                        )
+                ),
+                "generationConfig", Map.of(
+                        "responseMimeType", "application/json"
+                )
         );
 
         return webClient.post()
@@ -39,7 +48,6 @@ public class GeminiService {
                 .bodyValue(requestBody)
                 .retrieve()
 
-                // 429 ko clearly identify karo
                 .onStatus(
                         status -> status.value() == 429,
                         response -> response.bodyToMono(String.class)
@@ -48,7 +56,6 @@ public class GeminiService {
                                 ))
                 )
 
-                // Baaki HTTP errors
                 .onStatus(
                         HttpStatusCode::isError,
                         response -> response.bodyToMono(String.class)
