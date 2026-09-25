@@ -1,0 +1,59 @@
+server:
+  port: 8084
+
+# =========================
+# MongoDB
+# =========================
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/aiService
+
+  # =========================
+  # Kafka
+  # =========================
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    # Producer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    # Consumer
+    consumer:
+      group-id: activity-processor-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+        spring:
+          json:
+            use:
+              type:
+                headers: false
+            value:
+              default:
+                type: com.fitness.aiService.models.Activity
+            trusted:
+              packages: "*"
+
+  # =========================
+  # Google Gemini / Spring AI
+  # =========================
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
+
+        chat:
+          model: gemini-3.8-flash
+          temperature: 0.5
+
+# =========================
+# Kafka Topic
+# =========================
+kafka:
+  topic:
+    name: activity-events
