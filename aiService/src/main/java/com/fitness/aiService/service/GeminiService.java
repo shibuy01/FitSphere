@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -29,16 +28,8 @@ public class GeminiService {
     public String getRecommendation(String details) {
 
         Map<String, Object> requestBody = Map.of(
-                "contents", List.of(
-                        Map.of(
-                                "parts", List.of(
-                                        Map.of("text", details)
-                                )
-                        )
-                ),
-                "generationConfig", Map.of(
-                        "responseMimeType", "application/json"
-                )
+                "model", geminiModel,
+                "input", details
         );
 
         return webClient.post()

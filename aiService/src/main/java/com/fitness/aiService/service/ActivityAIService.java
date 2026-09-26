@@ -44,14 +44,55 @@ public class ActivityAIService {
 
             JsonNode rootNode = mapper.readTree(aiResponse);
 
-            // Gemini response se text extract karo
+            // =====================================================
+            // GEMINI INTERACTIONS API RESPONSE SE TEXT EXTRACT
+            // =====================================================
+
             JsonNode textNode = rootNode
-                    .path("candidates")
+                    .path("steps")
                     .get(0)
                     .path("content")
-                    .path("parts")
                     .get(0)
                     .path("text");
+
+            JsonNode tex1tNode = null;
+
+            JsonNode stepsNode = rootNode.path("steps");
+
+            if (stepsNode.isArray()) {
+
+                for (JsonNode step : stepsNode) {
+
+                    if ("model_output".equals(
+                            step.path("type").asText()
+                    )) {
+
+                        JsonNode contentNode =
+                                step.path("content");
+
+                        if (contentNode.isArray()
+                                && !contentNode.isEmpty()) {
+
+                            tex1tNode = contentNode
+                                    .get(0)
+                                    .path("text");
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (tex1tNode == null
+                    || tex1tNode.isMissingNode()
+                    || tex1tNode.asText().isBlank()) {
+
+                log.error(
+                        "Could not find model_output text in Gemini response"
+                );
+
+                return createDefaultRecommendation(activity);
+            }
 
             String jsonContent = textNode.asText()
                     .replace("```json", "")
@@ -61,17 +102,22 @@ public class ActivityAIService {
             log.info("PARSED RESPONSE FROM AI: {}", jsonContent);
 
 
-            // AI ke actual JSON ko parse karo
+            // =====================================================
+            // AI KE ACTUAL JSON KO PARSE KARO
+            // =====================================================
+
             JsonNode analysisJson = mapper.readTree(jsonContent);
 
-            JsonNode analysisNode = analysisJson.path("analysis");
+            JsonNode analysisNode =
+                    analysisJson.path("analysis");
 
 
-            // ==========================
+            // =====================================================
             // ANALYSIS
-            // ==========================
+            // =====================================================
 
-            StringBuilder fullAnalysis = new StringBuilder();
+            StringBuilder fullAnalysis =
+                    new StringBuilder();
 
             addAnalysisSection(
                     fullAnalysis,
@@ -102,9 +148,9 @@ public class ActivityAIService {
             );
 
 
-            // ==========================
+            // =====================================================
             // IMPROVEMENTS
-            // ==========================
+            // =====================================================
 
             List<String> improvements =
                     extractImprovements(
@@ -112,9 +158,9 @@ public class ActivityAIService {
                     );
 
 
-            // ==========================
+            // =====================================================
             // SUGGESTIONS
-            // ==========================
+            // =====================================================
 
             List<String> suggestions =
                     extractSuggestions(
@@ -122,9 +168,9 @@ public class ActivityAIService {
                     );
 
 
-            // ==========================
+            // =====================================================
             // SAFETY
-            // ==========================
+            // =====================================================
 
             List<String> safety =
                     extractSafetyGuidelines(
@@ -132,14 +178,16 @@ public class ActivityAIService {
                     );
 
 
-            // ==========================
+            // =====================================================
             // CREATE RECOMMENDATION
-            // ==========================
+            // =====================================================
 
             return Recommendation.builder()
                     .activityId(activity.getId())
                     .userId(activity.getUserId())
-                    .recommendation(fullAnalysis.toString().trim())
+                    .recommendation(
+                            fullAnalysis.toString().trim()
+                    )
                     .improvements(improvements)
                     .suggestions(suggestions)
                     .safety(safety)
@@ -148,16 +196,19 @@ public class ActivityAIService {
 
         } catch (Exception e) {
 
-            log.error("Error while processing AI response", e);
+            log.error(
+                    "Error while processing AI response",
+                    e
+            );
 
             return createDefaultRecommendation(activity);
         }
     }
 
 
-    // ==========================
+    // =========================================================
     // DEFAULT RECOMMENDATION
-    // ==========================
+    // =========================================================
 
     private Recommendation createDefaultRecommendation(
             Activity activity
@@ -191,9 +242,9 @@ public class ActivityAIService {
     }
 
 
-    // ==========================
+    // =========================================================
     // SAFETY
-    // ==========================
+    // =========================================================
 
     private List<String> extractSafetyGuidelines(
             JsonNode safetyNode
@@ -219,9 +270,9 @@ public class ActivityAIService {
     }
 
 
-    // ==========================
+    // =========================================================
     // SUGGESTIONS
-    // ==========================
+    // =========================================================
 
     private List<String> extractSuggestions(
             JsonNode suggestionsNode
@@ -234,10 +285,14 @@ public class ActivityAIService {
             suggestionsNode.forEach(suggestion -> {
 
                 String workout =
-                        suggestion.path("workout").asText();
+                        suggestion
+                                .path("workout")
+                                .asText();
 
                 String description =
-                        suggestion.path("description").asText();
+                        suggestion
+                                .path("description")
+                                .asText();
 
                 suggestions.add(
                         String.format(
@@ -260,22 +315,25 @@ public class ActivityAIService {
     }
 
 
-    // ==========================
+    // =========================================================
     // IMPROVEMENTS
-    // ==========================
+    // =========================================================
 
     private List<String> extractImprovements(
             JsonNode improvementsNode
     ) {
 
-        List<String> improvements = new ArrayList<>();
+        List<String> improvements =
+                new ArrayList<>();
 
         if (improvementsNode.isArray()) {
 
             improvementsNode.forEach(improvement -> {
 
                 String area =
-                        improvement.path("area").asText();
+                        improvement
+                                .path("area")
+                                .asText();
 
                 String detail =
                         improvement
@@ -303,9 +361,9 @@ public class ActivityAIService {
     }
 
 
-    // ==========================
+    // =========================================================
     // ANALYSIS SECTION
-    // ==========================
+    // =========================================================
 
     private void addAnalysisSection(
             StringBuilder fullAnalysis,
@@ -329,16 +387,16 @@ public class ActivityAIService {
     }
 
 
-    // ==========================
+    // =========================================================
     // PROMPT
-    // ==========================
+    // =========================================================
 
     private String createPromptForActivity(
             Activity activity
     ) {
 
         return String.format("""
-                
+
                 Analyze this fitness activity and provide detailed recommendations in the following EXACT JSON format:
 
                 {
@@ -386,7 +444,7 @@ public class ActivityAIService {
                 Return ONLY valid JSON.
                 Do not use markdown.
                 Do not wrap the response in ```json.
-                
+
                 """,
                 activity.getType(),
                 activity.getDuration(),
