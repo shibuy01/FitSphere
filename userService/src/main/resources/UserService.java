@@ -1,13 +1,13 @@
 package com.fitness.userService.services;
 
-import com.fitness.userService.dto.AuthenticationRequest;
-import com.fitness.userService.dto.AuthenticationResponse;
 import com.fitness.userService.dto.RegistorRequest;
 import com.fitness.userService.dto.UserResponse;
 import com.fitness.userService.models.User;
 import com.fitness.userService.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -62,46 +62,5 @@ public class UserService {
     public Boolean existByUserId(String userId) {
         log.info("Calling userService for {]" + userId);
         return userRepository.existsById(userId);
-    }
-
-    public AuthenticationResponse authenticate(
-            AuthenticationRequest request) {
-
-        User user = userRepository
-                .findByEmail(request.getEmail())
-                .orElse(null);
-
-        if (user == null) {
-
-            return new AuthenticationResponse(
-                    false,
-                    null,
-                    null,
-                    null
-            );
-        }
-
-        boolean passwordMatches =
-                passwordEncoder.matches(
-                        request.getPassword(),
-                        user.getPassword()
-                );
-
-        if (!passwordMatches) {
-
-            return new AuthenticationResponse(
-                    false,
-                    null,
-                    null,
-                    null
-            );
-        }
-
-        return new AuthenticationResponse(
-                true,
-                user.getId(),
-                user.getEmail(),
-                user.getRole().name()
-        );
     }
 }

@@ -45,7 +45,7 @@ public class ActivityAIService {
             JsonNode rootNode = mapper.readTree(aiResponse);
 
             // =====================================================
-            // GEMINI INTERACTIONS API RESPONSE SE TEXT EXTRACT
+            //     GEMINI INTERACTIONS API RESPONSE SE TEXT EXTRACT
             // =====================================================
 
             JsonNode textNode = rootNode
@@ -103,7 +103,7 @@ public class ActivityAIService {
 
 
             // =====================================================
-            // AI KE ACTUAL JSON KO PARSE KARO
+            //          AI KE ACTUAL JSON KO PARSE KARO
             // =====================================================
 
             JsonNode analysisJson = mapper.readTree(jsonContent);
@@ -113,7 +113,7 @@ public class ActivityAIService {
 
 
             // =====================================================
-            // ANALYSIS
+            //                  ANALYSIS
             // =====================================================
 
             StringBuilder fullAnalysis =
@@ -149,7 +149,7 @@ public class ActivityAIService {
 
 
             // =====================================================
-            // IMPROVEMENTS
+            //               IMPROVEMENTS
             // =====================================================
 
             List<String> improvements =
@@ -159,7 +159,7 @@ public class ActivityAIService {
 
 
             // =====================================================
-            // SUGGESTIONS
+            //                 SUGGESTIONS
             // =====================================================
 
             List<String> suggestions =
@@ -169,7 +169,7 @@ public class ActivityAIService {
 
 
             // =====================================================
-            // SAFETY
+            //                  SAFETY
             // =====================================================
 
             List<String> safety =
@@ -179,7 +179,7 @@ public class ActivityAIService {
 
 
             // =====================================================
-            // CREATE RECOMMENDATION
+            //           CREATE RECOMMENDATION
             // =====================================================
 
             return Recommendation.builder()
@@ -207,7 +207,7 @@ public class ActivityAIService {
 
 
     // =========================================================
-    // DEFAULT RECOMMENDATION
+    //              DEFAULT RECOMMENDATION
     // =========================================================
 
     private Recommendation createDefaultRecommendation(
@@ -243,7 +243,7 @@ public class ActivityAIService {
 
 
     // =========================================================
-    // SAFETY
+    //                     SAFETY
     // =========================================================
 
     private List<String> extractSafetyGuidelines(
@@ -271,7 +271,7 @@ public class ActivityAIService {
 
 
     // =========================================================
-    // SUGGESTIONS
+    //                  SUGGESTIONS
     // =========================================================
 
     private List<String> extractSuggestions(
@@ -316,7 +316,7 @@ public class ActivityAIService {
 
 
     // =========================================================
-    // IMPROVEMENTS
+    //                  IMPROVEMENTS
     // =========================================================
 
     private List<String> extractImprovements(
@@ -362,7 +362,7 @@ public class ActivityAIService {
 
 
     // =========================================================
-    // ANALYSIS SECTION
+    //             ANALYSIS SECTION
     // =========================================================
 
     private void addAnalysisSection(
@@ -388,7 +388,7 @@ public class ActivityAIService {
 
 
     // =========================================================
-    // PROMPT
+    //                      PROMPT
     // =========================================================
 
     private String createPromptForActivity(

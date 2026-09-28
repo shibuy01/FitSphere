@@ -1,5 +1,7 @@
 package com.fitness.userService.controller;
 
+import com.fitness.userService.dto.AuthenticationRequest;
+import com.fitness.userService.dto.AuthenticationResponse;
 import com.fitness.userService.dto.RegistorRequest;
 import com.fitness.userService.dto.UserResponse;
 import com.fitness.userService.services.UserService;
@@ -16,18 +18,38 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/registor")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegistorRequest request){
-       return ResponseEntity.ok(userService.registor(request));
+    public ResponseEntity<UserResponse> register(
+            @Valid @RequestBody RegistorRequest request) {
+
+        return ResponseEntity.ok(
+                userService.registor(request)
+        );
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponse> getUserProfile(@PathVariable String userId){
-        return ResponseEntity.ok(userService.getProfile(userId));
+    public ResponseEntity<UserResponse> getUserProfile(
+            @PathVariable String userId) {
+
+        return ResponseEntity.ok(
+                userService.getProfile(userId)
+        );
     }
 
     @GetMapping("/{userId}/validate")
-    public ResponseEntity<Boolean> validate(@PathVariable String userId){
-        return ResponseEntity.ok(userService.existByUserId(userId));
+    public ResponseEntity<Boolean> validate(
+            @PathVariable String userId) {
+
+        return ResponseEntity.ok(
+                userService.existByUserId(userId)
+        );
     }
 
+    @PostMapping("/authenticate")
+    public ResponseEntity<AuthenticationResponse> authenticate(
+            @RequestBody AuthenticationRequest request) {
+
+        return ResponseEntity.ok(
+                userService.authenticate(request)
+        );
+    }
 }
