@@ -8,8 +8,8 @@ import com.fitness.userService.models.User;
 import com.fitness.userService.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -19,20 +19,30 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+
+    // =========================
+    // REGISTER USER
+    // =========================
     public UserResponse registor(RegistorRequest request) {
 
-        if(userRepository.existsByEmail(request.getEmail())){
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
 
         User user = new User();
 
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword());
+
+        // Password encrypt hoga
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
+
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
 
         User saveUser = userRepository.save(user);
+
         UserResponse response = new UserResponse();
 
         response.setId(saveUser.getId());
@@ -43,14 +53,26 @@ public class UserService {
         return response;
     }
 
+
+    // =========================
+    // GET USER PROFILE
+    // =========================
     public UserResponse getProfile(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(
+                        () -> new RuntimeException("User not found")
+                );
 
         UserResponse response = new UserResponse();
 
         response.setId(user.getId());
         response.setEmail(user.getEmail());
-        response.setPassword(user.getPassword());
+
+        // ❌ Password response mein nahi bhejna
+        // response.setPassword(user.getPassword());
+
         response.setFirstName(user.getFirstName());
         response.setLastName(user.getLastName());
         response.setCreatedDate(user.getCreatedDate());
@@ -59,11 +81,21 @@ public class UserService {
         return response;
     }
 
+
+    // =========================
+    // VALIDATE USER
+    // =========================
     public Boolean existByUserId(String userId) {
-        log.info("Calling userService for {]" + userId);
+
+        log.info("Calling userService for {}", userId);
+
         return userRepository.existsById(userId);
     }
 
+
+    // =========================
+    // AUTHENTICATE USER
+    // =========================
     public AuthenticationResponse authenticate(
             AuthenticationRequest request) {
 
@@ -71,6 +103,7 @@ public class UserService {
                 .findByEmail(request.getEmail())
                 .orElse(null);
 
+        // User nahi mila
         if (user == null) {
 
             return new AuthenticationResponse(
@@ -81,12 +114,14 @@ public class UserService {
             );
         }
 
+        // Password check
         boolean passwordMatches =
                 passwordEncoder.matches(
                         request.getPassword(),
                         user.getPassword()
                 );
 
+        // Password incorrect
         if (!passwordMatches) {
 
             return new AuthenticationResponse(
@@ -97,6 +132,7 @@ public class UserService {
             );
         }
 
+        // Authentication successful
         return new AuthenticationResponse(
                 true,
                 user.getId(),
