@@ -1,7 +1,7 @@
 package com.fitness.userService.controller;
 
-import com.fitness.userService.dto.AuthenticationRequest;
-import com.fitness.userService.dto.AuthenticationResponse;
+import com.fitness.userService.dto.LoginRequest;
+import com.fitness.userService.dto.LoginResponse;
 import com.fitness.userService.dto.RegistorRequest;
 import com.fitness.userService.dto.UserResponse;
 import com.fitness.userService.services.UserService;
@@ -44,12 +44,12 @@ public class UserController {
         );
     }
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest request) {
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(
+            @RequestBody LoginRequest request) {
 
         return ResponseEntity.ok(
-                userService.authenticate(request)
+                userService.login(request)
         );
     }
 }

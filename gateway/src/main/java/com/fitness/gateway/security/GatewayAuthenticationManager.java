@@ -37,7 +37,7 @@ public class GatewayAuthenticationManager
 
         return webClientBuilder.build()
                 .post()
-                .uri("http://USER-SERVICE/api/users/authenticate")
+                .uri("http://USER-SERVICE/api/users/login")
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(UserAuthenticationResponse.class)

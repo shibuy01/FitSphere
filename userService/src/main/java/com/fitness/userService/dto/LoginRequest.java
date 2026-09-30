@@ -3,7 +3,7 @@ package com.fitness.userService.dto;
 import lombok.Data;
 
 @Data
-public class AuthenticationRequest {
+public class LoginRequest {
 
     private String email;
     private String password;

@@ -1,7 +1,7 @@
 package com.fitness.userService.services;
 
-import com.fitness.userService.dto.AuthenticationRequest;
-import com.fitness.userService.dto.AuthenticationResponse;
+import com.fitness.userService.dto.LoginRequest;
+import com.fitness.userService.dto.LoginResponse;
 import com.fitness.userService.dto.RegistorRequest;
 import com.fitness.userService.dto.UserResponse;
 import com.fitness.userService.models.User;
@@ -20,9 +20,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
 
-    // =========================
     // REGISTER USER
-    // =========================
     public UserResponse registor(RegistorRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -33,7 +31,7 @@ public class UserService {
 
         user.setEmail(request.getEmail());
 
-        // Password encrypt hoga
+        // Password encrypt
         user.setPassword(
                 passwordEncoder.encode(request.getPassword())
         );
@@ -54,9 +52,7 @@ public class UserService {
     }
 
 
-    // =========================
     // GET USER PROFILE
-    // =========================
     public UserResponse getProfile(String userId) {
 
         User user = userRepository
@@ -70,9 +66,7 @@ public class UserService {
         response.setId(user.getId());
         response.setEmail(user.getEmail());
 
-        // ❌ Password response mein nahi bhejna
-        // response.setPassword(user.getPassword());
-
+        // Password response me nhi rahega
         response.setFirstName(user.getFirstName());
         response.setLastName(user.getLastName());
         response.setCreatedDate(user.getCreatedDate());
@@ -82,31 +76,31 @@ public class UserService {
     }
 
 
-    // =========================
     // VALIDATE USER
-    // =========================
     public Boolean existByUserId(String userId) {
-
         log.info("Calling userService for {}", userId);
-
         return userRepository.existsById(userId);
     }
 
 
-    // =========================
-    // AUTHENTICATE USER
-    // =========================
-    public AuthenticationResponse authenticate(
-            AuthenticationRequest request) {
+    // LOGIN
+    public LoginResponse login(
+            LoginRequest request) {
 
+        // 1. Email se user find karo
         User user = userRepository
                 .findByEmail(request.getEmail())
-                .orElse(null);
+                .orElseThrow(() -> new RuntimeException("User Not Found"));
 
-        // User nahi mila
+        // 2. User nahi mila
         if (user == null) {
 
-            return new AuthenticationResponse(
+            log.warn(
+                    "Login failed - user not found: {}",
+                    request.getEmail()
+            );
+
+            return new LoginResponse(
                     false,
                     null,
                     null,
@@ -114,17 +108,22 @@ public class UserService {
             );
         }
 
-        // Password check
+        // 3. BCrypt password check
         boolean passwordMatches =
                 passwordEncoder.matches(
                         request.getPassword(),
                         user.getPassword()
                 );
 
-        // Password incorrect
+        // 4. Password incorrect
         if (!passwordMatches) {
 
-            return new AuthenticationResponse(
+            log.warn(
+                    "Login failed - incorrect password for: {}",
+                    request.getEmail()
+            );
+
+            return new LoginResponse(
                     false,
                     null,
                     null,
@@ -132,8 +131,13 @@ public class UserService {
             );
         }
 
-        // Authentication successful
-        return new AuthenticationResponse(
+        // 5. Login successful
+        log.info(
+                "Login successful for user: {}",
+                user.getEmail()
+        );
+
+        return new LoginResponse(
                 true,
                 user.getId(),
                 user.getEmail(),
