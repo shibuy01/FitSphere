@@ -38,9 +38,8 @@ public class SecurityConfig {
                 new WebSessionServerSecurityContextRepository()
         );
 
-        // ==============================
+
         // LOGIN SUCCESS
-        // ==============================
         filter.setAuthenticationSuccessHandler(
                 (webFilterExchange, authentication) -> {
 
@@ -55,9 +54,8 @@ public class SecurityConfig {
                 }
         );
 
-        // ==============================
+
         // LOGIN FAILURE
-        // ==============================
         filter.setAuthenticationFailureHandler(
                 (webFilterExchange, exception) -> {
 
@@ -83,28 +81,21 @@ public class SecurityConfig {
 
         return http
 
-                // ==============================
                 // CORS
-                // ==============================
                 .cors(cors -> {
                 })
 
-                // ==============================
                 // CSRF
-                // ==============================
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
 
-                // ==============================
                 // CUSTOM JSON AUTHENTICATION
-                // ==============================
                 .addFilterAt(
                         authenticationWebFilter,
                         SecurityWebFiltersOrder.AUTHENTICATION
                 )
 
-                // ==============================
+
                 // AUTHORIZATION
-                // ==============================
                 .authorizeExchange(exchange -> exchange
 
                         // PUBLIC ENDPOINTS
@@ -121,9 +112,7 @@ public class SecurityConfig {
     }
 
 
-    // ==============================
     // CORS CONFIGURATION
-    // ==============================
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
