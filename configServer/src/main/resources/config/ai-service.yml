@@ -1,26 +1,21 @@
 server:
   port: 8084
 
-# =========================
-# MongoDB
-# =========================
 spring:
+  application:
+    name: ai-service
+
   data:
     mongodb:
       uri: mongodb://localhost:27017/aiService
 
-  # =========================
-  # Kafka
-  # =========================
   kafka:
     bootstrap-servers: localhost:9092
 
-    # Producer
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
-    # Consumer
     consumer:
       group-id: activity-processor-group
       auto-offset-reset: earliest
@@ -39,21 +34,20 @@ spring:
             trusted:
               packages: "*"
 
-  # =========================
-  # Google Gemini / Spring AI
-  # =========================
   ai:
     google:
       genai:
         api-key: ${GEMINI_API_KEY}
-
         chat:
-          model: gemini-3.8-flash
-          temperature: 0.5
+          options:
+            model: gemini-3.8-flash
+            temperature: 0.5
 
-# =========================
-# Kafka Topic
-# =========================
+gemini:
+  api:
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent
+    key: ${GEMINI_API_KEY}
+
 kafka:
   topic:
     name: activity-events

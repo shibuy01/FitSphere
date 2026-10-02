@@ -20,101 +20,62 @@ import java.util.List;
 public class ActivityAIService {
 
     private final GeminiService geminiService;
+    private final ObjectMapper objectMapper;
 
     public Recommendation generateRecommendation(Activity activity) {
-
         String prompt = createPromptForActivity(activity);
-
         String aiResponse = geminiService.getRecommendation(prompt);
-
-        log.info("RESPONSE FROM AI: {}", aiResponse);
-
+        log.info("Response received from Gemini AI");
         return processAiResponse(activity, aiResponse);
     }
 
-
     private Recommendation processAiResponse(
             Activity activity,
-            String aiResponse
-    ) {
+            String aiResponse) {
 
         try {
 
-            ObjectMapper mapper = new ObjectMapper();
-
-            JsonNode rootNode = mapper.readTree(aiResponse);
-
-            // =====================================================
-            //     GEMINI INTERACTIONS API RESPONSE SE TEXT EXTRACT
-            // =====================================================
+            JsonNode rootNode = objectMapper.readTree(aiResponse);
 
             JsonNode textNode = rootNode
-                    .path("steps")
-                    .get(0)
+                    .path("candidates")
+                    .path(0)
                     .path("content")
-                    .get(0)
+                    .path("parts")
+                    .path(0)
                     .path("text");
 
-            JsonNode tex1tNode = null;
+            // Check Gemini response text
+            if (textNode.isMissingNode()
+                    || textNode.isNull()
+                    || textNode.asText().isBlank()) {
 
-            JsonNode stepsNode = rootNode.path("steps");
+                log.error("Could not find Gemini response text");
 
-            if (stepsNode.isArray()) {
-
-                for (JsonNode step : stepsNode) {
-
-                    if ("model_output".equals(
-                            step.path("type").asText()
-                    )) {
-
-                        JsonNode contentNode =
-                                step.path("content");
-
-                        if (contentNode.isArray()
-                                && !contentNode.isEmpty()) {
-
-                            tex1tNode = contentNode
-                                    .get(0)
-                                    .path("text");
-
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (tex1tNode == null
-                    || tex1tNode.isMissingNode()
-                    || tex1tNode.asText().isBlank()) {
-
-                log.error(
-                        "Could not find model_output text in Gemini response"
-                );
+                // Temporary debugging - Gemini response dekhne ke liye
+                log.error("Gemini response: {}", aiResponse);
 
                 return createDefaultRecommendation(activity);
             }
 
+//          Extract actual AI generated JSON
             String jsonContent = textNode.asText()
                     .replace("```json", "")
+                    .replace("```JSON", "")
                     .replace("```", "")
                     .trim();
 
-            log.info("PARSED RESPONSE FROM AI: {}", jsonContent);
+            log.info("Parsing Gemini recommendation JSON");
 
 
-            // =====================================================
-            //          AI KE ACTUAL JSON KO PARSE KARO
-            // =====================================================
+//          Parse AI generated JSON
+            JsonNode analysisJson =
+                    objectMapper.readTree(jsonContent);
 
-            JsonNode analysisJson = mapper.readTree(jsonContent);
 
+//          Extract analysis
             JsonNode analysisNode =
                     analysisJson.path("analysis");
-
-
-            // =====================================================
-            //                  ANALYSIS
-            // =====================================================
 
             StringBuilder fullAnalysis =
                     new StringBuilder();
@@ -148,40 +109,28 @@ public class ActivityAIService {
             );
 
 
-            // =====================================================
-            //               IMPROVEMENTS
-            // =====================================================
-
+//          Extract improvements
             List<String> improvements =
                     extractImprovements(
                             analysisJson.path("improvements")
                     );
 
 
-            // =====================================================
-            //                 SUGGESTIONS
-            // =====================================================
-
+//          Extract suggestion
             List<String> suggestions =
                     extractSuggestions(
                             analysisJson.path("suggestions")
                     );
 
 
-            // =====================================================
-            //                  SAFETY
-            // =====================================================
-
+//          safety guidelines
             List<String> safety =
                     extractSafetyGuidelines(
                             analysisJson.path("safety")
                     );
 
 
-            // =====================================================
-            //           CREATE RECOMMENDATION
-            // =====================================================
-
+//          Create recommendation
             return Recommendation.builder()
                     .activityId(activity.getId())
                     .userId(activity.getUserId())
@@ -197,7 +146,8 @@ public class ActivityAIService {
         } catch (Exception e) {
 
             log.error(
-                    "Error while processing AI response",
+                    "Error while processing AI response for activity {}",
+                    activity.getId(),
                     e
             );
 
@@ -206,13 +156,9 @@ public class ActivityAIService {
     }
 
 
-    // =========================================================
-    //              DEFAULT RECOMMENDATION
-    // =========================================================
-
+//  Default recommendation
     private Recommendation createDefaultRecommendation(
-            Activity activity
-    ) {
+            Activity activity) {
 
         return Recommendation.builder()
                 .activityId(activity.getId())
@@ -242,21 +188,21 @@ public class ActivityAIService {
     }
 
 
-    // =========================================================
-    //                     SAFETY
-    // =========================================================
-
+//  Extract safety guidelines
     private List<String> extractSafetyGuidelines(
-            JsonNode safetyNode
-    ) {
+            JsonNode safetyNode) {
 
-        List<String> safety = new ArrayList<>();
+        List<String> safety =
+                new ArrayList<>();
 
         if (safetyNode.isArray()) {
+            safetyNode.forEach(item -> {
+                if (!item.isNull()
+                        && !item.asText().isBlank()) {
 
-            safetyNode.forEach(item ->
-                    safety.add(item.asText())
-            );
+                    safety.add(item.asText());
+                }
+            });
         }
 
         if (safety.isEmpty()) {
@@ -270,15 +216,12 @@ public class ActivityAIService {
     }
 
 
-    // =========================================================
-    //                  SUGGESTIONS
-    // =========================================================
-
+//   Extract workout suggestions
     private List<String> extractSuggestions(
-            JsonNode suggestionsNode
-    ) {
+            JsonNode suggestionsNode) {
 
-        List<String> suggestions = new ArrayList<>();
+        List<String> suggestions =
+                new ArrayList<>();
 
         if (suggestionsNode.isArray()) {
 
@@ -287,41 +230,40 @@ public class ActivityAIService {
                 String workout =
                         suggestion
                                 .path("workout")
-                                .asText();
+                                .asText("");
 
                 String description =
                         suggestion
                                 .path("description")
-                                .asText();
+                                .asText("");
 
-                suggestions.add(
-                        String.format(
-                                "%s: %s",
-                                workout,
-                                description
-                        )
-                );
+                if (!workout.isBlank()
+                        || !description.isBlank()) {
+                    String result;
+                    if (!workout.isBlank() && !description.isBlank()) {
+                        result = workout + ": " + description;
+                    } else if (!workout.isBlank()) {
+                        result = workout;
+                    } else {
+                        result = description;
+                    }
+                    suggestions.add(result);
+                }
             });
         }
 
         if (suggestions.isEmpty()) {
-
             return Collections.singletonList(
                     "No specific suggestions provided"
             );
         }
-
         return suggestions;
     }
 
 
-    // =========================================================
-    //                  IMPROVEMENTS
-    // =========================================================
-
+//  Extract improvements
     private List<String> extractImprovements(
-            JsonNode improvementsNode
-    ) {
+            JsonNode improvementsNode) {
 
         List<String> improvements =
                 new ArrayList<>();
@@ -333,20 +275,26 @@ public class ActivityAIService {
                 String area =
                         improvement
                                 .path("area")
-                                .asText();
+                                .asText("");
 
                 String detail =
                         improvement
                                 .path("recommendation")
-                                .asText();
+                                .asText("");
 
-                improvements.add(
-                        String.format(
-                                "%s: %s",
-                                area,
-                                detail
-                        )
-                );
+                if (!area.isBlank()
+                        || !detail.isBlank()) {
+                    String result;
+                    if (!area.isBlank()
+                            && !detail.isBlank()) {
+                        result = area + ": " + detail;
+                    } else if (!area.isBlank()) {
+                        result = area;
+                    } else {
+                        result = detail;
+                    }
+                    improvements.add(result);
+                }
             });
         }
 
@@ -360,44 +308,36 @@ public class ActivityAIService {
         return improvements;
     }
 
-
-    // =========================================================
-    //             ANALYSIS SECTION
-    // =========================================================
-
+//   Append analysis sections
     private void addAnalysisSection(
             StringBuilder fullAnalysis,
             JsonNode analysisNode,
             String key,
-            String prefix
-    ) {
+            String prefix) {
 
-        if (!analysisNode.path(key).isMissingNode()) {
+        JsonNode value =
+                analysisNode.path(key);
+
+        if (!value.isMissingNode()
+                && !value.isNull()
+                && !value.asText().isBlank()) {
 
             fullAnalysis
                     .append(prefix)
                     .append(" ")
-                    .append(
-                            analysisNode
-                                    .path(key)
-                                    .asText()
-                    )
+                    .append(value.asText())
                     .append("\n\n");
         }
     }
 
-
-    // =========================================================
-    //                      PROMPT
-    // =========================================================
-
+//    Gemini prompt
     private String createPromptForActivity(
-            Activity activity
-    ) {
+            Activity activity) {
 
         return String.format("""
 
-                Analyze this fitness activity and provide detailed recommendations in the following EXACT JSON format:
+                Analyze this fitness activity and provide detailed
+                recommendations in the following EXACT JSON format.
 
                 {
                   "analysis": {
@@ -431,8 +371,7 @@ public class ActivityAIService {
                 Calories Burned: %d
                 Additional Metrics: %s
 
-                Provide detailed analysis focusing on:
-
+                Focus on:
                 - Overall performance
                 - Pace
                 - Heart rate
@@ -442,8 +381,8 @@ public class ActivityAIService {
                 - Safety guidelines
 
                 Return ONLY valid JSON.
-                Do not use markdown.
-                Do not wrap the response in ```json.
+                Do not use Markdown.
+                Do not wrap the response in code fences.
 
                 """,
                 activity.getType(),

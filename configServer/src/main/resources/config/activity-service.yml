@@ -11,9 +11,7 @@ spring:
     hibernate:
       ddl-auto: update
 
-  # =========================
   # Kafka
-  # =========================
   kafka:
     bootstrap-servers: localhost:9092
 
@@ -34,9 +32,7 @@ spring:
             trusted:
               packages: "com.fitness.*"
 
-# =========================
 # Eureka
-# =========================
 eureka:
   client:
     service-url:
@@ -45,9 +41,7 @@ eureka:
   instance:
     prefer-ip-address: true
 
-# =========================
-# Kafka Topic
-# =========================
+# Kafka Topi
 kafka:
   topic:
     name: activity-events

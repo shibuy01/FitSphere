@@ -20,6 +20,11 @@ spring:
               predicates:
                 - Path=/api/activities/**
 
+            - id: ai-service
+              uri: lb://AI-SERVICE
+              predicates:
+                - Path=/api/recommendations/**
+
           global cors:
             cors-configurations:
               '[/**]':
