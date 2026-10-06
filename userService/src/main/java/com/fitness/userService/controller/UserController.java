@@ -1,7 +1,5 @@
 package com.fitness.userService.controller;
 
-import com.fitness.userService.dto.LoginRequest;
-import com.fitness.userService.dto.LoginResponse;
 import com.fitness.userService.dto.RegistorRequest;
 import com.fitness.userService.dto.UserResponse;
 import com.fitness.userService.services.UserService;
@@ -41,15 +39,6 @@ public class UserController {
 
         return ResponseEntity.ok(
                 userService.existByUserId(userId)
-        );
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(
-            @RequestBody LoginRequest request) {
-
-        return ResponseEntity.ok(
-                userService.login(request)
         );
     }
 }

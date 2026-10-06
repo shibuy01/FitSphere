@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: gateway-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8181/realms/Fitsphere/protocol/openid-connect/certs
 
   cloud:
     gateway:
@@ -25,8 +30,8 @@ spring:
               predicates:
                 - Path=/api/recommendations/**
 
-          global cors:
-            cors-configurations:
+          globalcors:
+            corsConfigurations:
               '[/**]':
                 allowedOrigins:
                   - "http://localhost:5173"

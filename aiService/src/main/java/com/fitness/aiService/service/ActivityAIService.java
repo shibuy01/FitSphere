@@ -197,16 +197,13 @@ public class ActivityAIService {
 
         if (safetyNode.isArray()) {
             safetyNode.forEach(item -> {
-                if (!item.isNull()
-                        && !item.asText().isBlank()) {
-
+                if (!item.isNull() && !item.asText().isBlank()) {
                     safety.add(item.asText());
                 }
             });
         }
 
         if (safety.isEmpty()) {
-
             return Collections.singletonList(
                     "Follow general safety guidelines"
             );
@@ -216,7 +213,7 @@ public class ActivityAIService {
     }
 
 
-//   Extract workout suggestions
+//  workout suggestions
     private List<String> extractSuggestions(
             JsonNode suggestionsNode) {
 
@@ -224,9 +221,7 @@ public class ActivityAIService {
                 new ArrayList<>();
 
         if (suggestionsNode.isArray()) {
-
             suggestionsNode.forEach(suggestion -> {
-
                 String workout =
                         suggestion
                                 .path("workout")

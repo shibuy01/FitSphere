@@ -14,7 +14,6 @@ public class UserValidationService {
     private final WebClient userServiceWebClient;
 
     public boolean validateUser(String userId) {
-
         log.info("Calling userService for {]" + userId);
 
         try {
